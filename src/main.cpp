@@ -5,20 +5,18 @@
 #include <sstream>
 #include <vector>
 
-
 #include "scheduler.h"
-
 
 int main()
 {
 
     Scheduler scheduler;
 
-
     std::string input;
     bool shouldClose = false;
 
-    while(!shouldClose) {
+    while (!shouldClose)
+    {
         fmt::print("Command> ");
         std::getline(std::cin, input, '\n');
 
@@ -26,37 +24,39 @@ int main()
         std::string word;
         std::vector<std::string> tokens;
 
-        while(ss >> word) {
+        while (ss >> word)
+        {
             tokens.push_back(word);
         }
 
-
-        if(tokens[0] == "start") {
-
+        if (tokens[0] == "start")
+        {
         }
-        else if(tokens[0] == "step") {
-
+        else if (tokens[0] == "step")
+        {
         }
-        else if(tokens[0] == "stepBurst") {
-
+        else if (tokens[0] == "stepBurst")
+        {
         }
-        else if(tokens[0] == "setMemory") {
-
+        else if (tokens[0] == "setMemory")
+        {
         }
-        else if(tokens[0] == "getMemory") {
-
+        else if (tokens[0] == "getMemory")
+        {
         }
-        else if(tokens[0] == "run") {
-
+        else if (tokens[0] == "run")
+        {
         }
-        else if(tokens[0] == "addProgram") {
-
+        else if (tokens[0] == "addProgram")
+        {
         }
-        else {
+        else
+        {
             fmt::println("Invalid commands");
         }
 
-        if(tokens[0] == "quit") {
+        if (tokens[0] == "quit")
+        {
             shouldClose = true;
         }
     }
