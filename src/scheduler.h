@@ -4,10 +4,11 @@
 #include <queue>
 #include <string>
 #include <utility>
+#include <memory>
 
 class Scheduler
 {
-    int tick_count = 0;
+    int elapsed_time = 0;
     int total_memory = 4;
     int used_memory = 0;
     int burst_size = 4;
@@ -17,9 +18,13 @@ class Scheduler
         std::string name;
         int time_req;
         int mem_req;
-        int io_delay;
-        int io_time_req;
-        int execution_time;
+        std::queue<std::pair<int, int>> io_pairs;
+
+        int remaining_time;
+        // time unit when this task actually finished running
+        int finished_time;
+
+        Task(std::string name, int time_req, int mem_req, std::queue<std::pair<int, int>> io_pairs = {}) : name(name), time_req(time_req), mem_req(mem_req), io_pairs(io_pairs), remaining_time(time_req), finished_time(0) {}
     };
 
     std::queue<Task> active_tasks;
@@ -38,7 +43,7 @@ public:
     void set_memory(int mem_size);
     int get_memory();
     void run();
-    void addProgram(std::string program_name, int time_req, int mem_req, int io_delay = 0, int io_time_req = 0);
+    void addProgram(std::string program_name, int time_req, int mem_req, std::queue<std::pair<int, int>> io_pairs);
 };
 
 #endif
