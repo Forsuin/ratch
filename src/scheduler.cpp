@@ -11,10 +11,17 @@ void Scheduler::start(std::string program_name)
     {
         if ((*it).name == program_name)
         {
-            // add task to active queue and remove from inactive
-            active_tasks.push(*it);
-            inactive_tasks.erase(it);
-            break;
+            if (used_memory + (*it).mem_req < total_memory)
+            {
+                // add task to active queue and remove from inactive
+                active_tasks.push(*it);
+                inactive_tasks.erase(it);
+                break;
+            }
+            else
+            {
+                fmt::println("Unable to start program, not enough memory");
+            }
         }
     }
 }
@@ -94,6 +101,8 @@ void Scheduler::update()
         current_task.finished_time = elapsed_time;
         finished_tasks.push_back(current_task);
     }
+
+    fmt::println("Current time <{}>", elapsed_time);
 
     elapsed_time++;
     current_task.remaining_time--;
