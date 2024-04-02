@@ -39,6 +39,21 @@ void Scheduler::step(int amt_time)
 void Scheduler::set_burst(int burst_size)
 {
     this->burst_size = burst_size;
+
+    for (auto &t : active_tasks)
+    {
+        t.burst_size = burst_size;
+    }
+
+    for (auto &t : waiting_tasks)
+    {
+        t.burst_size = burst_size;
+    }
+
+    for (auto &t : inactive_tasks)
+    {
+        t.burst_size = burst_size;
+    }
 }
 
 void Scheduler::set_memory(int mem_size)
@@ -78,7 +93,6 @@ void Scheduler::update()
         Fifth, check if the currently running task has finished it's burst, but still has time left
         Sixth, increment elapsed time and decrement current tasks remaining time and waiting_task
     */
-
     Task &current_task = active_tasks.front();
 
     if (current_task.remaining_time == 0)
@@ -106,6 +120,13 @@ void Scheduler::update()
         waiting_tasks.front().io_pairs.pop();
         active_tasks.push_back(waiting_tasks.front());
         waiting_tasks.pop_front();
+    }
+
+    if (current_task.burst_size == 0)
+    {
+        current_task.burst_size = burst_size;
+        active_tasks.push_back(active_tasks.front());
+        active_tasks.pop_front();
     }
 
     fmt::println("Current time <{}>", elapsed_time);
@@ -149,6 +170,7 @@ void Scheduler::update()
 
     elapsed_time++;
     current_task.remaining_time--;
+    current_task.burst_size--;
 
     if (!current_task.io_pairs.empty())
     {

@@ -81,7 +81,7 @@ int main()
 
             int mem_size = std::stoi(tokens[1]);
 
-            scheduler.set_burst(mem_size);
+            scheduler.set_memory(mem_size);
         }
         else if (tokens[0] == "getMemory")
         {

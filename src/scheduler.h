@@ -25,7 +25,12 @@ class Scheduler
         // time unit when this task actually finished running
         int finished_time;
 
-        Task(std::string name, int time_req, int mem_req, std::queue<std::pair<int, int>> io_pairs = {}) : name(name), time_req(time_req), mem_req(mem_req), io_pairs(io_pairs), remaining_time(time_req), finished_time(0) {}
+        int burst_size;
+
+        Task(std::string name, int time_req, int mem_req, std::queue<std::pair<int, int>> io_pairs = {}) : name(name), time_req(time_req), mem_req(mem_req), io_pairs(io_pairs), remaining_time(time_req), finished_time(0)
+        {
+            burst_size = this->burst_size;
+        }
     };
 
     std::deque<Task> active_tasks;
