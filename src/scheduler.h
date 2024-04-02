@@ -1,6 +1,7 @@
 #pragma once
 #ifndef SCHEDULER_H
 
+#include <deque>
 #include <queue>
 #include <string>
 #include <utility>
@@ -27,8 +28,8 @@ class Scheduler
         Task(std::string name, int time_req, int mem_req, std::queue<std::pair<int, int>> io_pairs = {}) : name(name), time_req(time_req), mem_req(mem_req), io_pairs(io_pairs), remaining_time(time_req), finished_time(0) {}
     };
 
-    std::queue<Task> active_tasks;
-    std::queue<Task> waiting_tasks;
+    std::deque<Task> active_tasks;
+    std::deque<Task> waiting_tasks;
 
     // vector so I can iterate over these tasks
     std::vector<Task> finished_tasks;

@@ -14,7 +14,7 @@ void Scheduler::start(std::string program_name)
             if (used_memory + (*it).mem_req < total_memory)
             {
                 // add task to active queue and remove from inactive
-                active_tasks.push(*it);
+                active_tasks.push_back(*it);
                 inactive_tasks.erase(it);
                 break;
             }
@@ -79,33 +79,82 @@ void Scheduler::update()
         Sixth, increment elapsed time and decrement current tasks remaining time and waiting_task
     */
 
-    Task current_task = active_tasks.front();
+    Task &current_task = active_tasks.front();
+
+    if (current_task.remaining_time == 0)
+    {
+        current_task.finished_time = elapsed_time;
+        used_memory -= current_task.mem_req;
+        current_task.finished_time = elapsed_time;
+        finished_tasks.push_back(current_task);
+        active_tasks.pop_front();
+        current_task = active_tasks.front();
+    }
 
     if (!current_task.io_pairs.empty())
     {
         if (current_task.io_pairs.front().first == 0)
         {
-            waiting_tasks.push(current_task);
+            waiting_tasks.push_back(current_task);
+            active_tasks.pop_front();
+            current_task = active_tasks.front();
         }
     }
 
     if (!waiting_tasks.empty() && waiting_tasks.front().io_pairs.front().second == 0)
     {
         waiting_tasks.front().io_pairs.pop();
-        active_tasks.push(waiting_tasks.front());
-        waiting_tasks.pop();
-    }
-
-    if (current_task.remaining_time == 0)
-    {
-        current_task.finished_time = elapsed_time;
-        finished_tasks.push_back(current_task);
+        active_tasks.push_back(waiting_tasks.front());
+        waiting_tasks.pop_front();
     }
 
     fmt::println("Current time <{}>", elapsed_time);
 
+    if (!active_tasks.empty())
+    {
+        fmt::println("Running job {} has {} time units left and is using {} memory resources", current_task.name, current_task.remaining_time, current_task.mem_req);
+
+        fmt::println("The queue is:");
+
+        int i = 1;
+        for (auto it = active_tasks.begin() + 1; it != active_tasks.end(); it++, i++)
+        {
+            Task &t = (*it);
+            fmt::println("\tPosition {}: job {} has {} time units and is using {} memory resources.", i, t.name, t.remaining_time, t.mem_req);
+        }
+    }
+    else
+    {
+        fmt::println("Current job is empty");
+        fmt::println("The queue is: empty");
+    }
+
+    if (!waiting_tasks.empty())
+    {
+        for (auto &t : waiting_tasks)
+        {
+            fmt::println("The process {} is obtaining IO and will be back in {} time unit.", t.name, t.io_pairs.front().second);
+        }
+    }
+
+    if (!finished_tasks.empty())
+    {
+        fmt::println("Finished jobs are:");
+
+        for (auto &t : finished_tasks)
+        {
+            fmt::println("\t{} {} {}", t.name, t.time_req, t.finished_time);
+        }
+    }
+
     elapsed_time++;
     current_task.remaining_time--;
+
+    if (!current_task.io_pairs.empty())
+    {
+        current_task.io_pairs.front().first--;
+    }
+
     if (!waiting_tasks.empty())
     {
         waiting_tasks.front().io_pairs.front().second--;
