@@ -3,6 +3,8 @@
 
 #include "scheduler.h"
 
+// See header file for function descriptions
+
 void Scheduler::start(std::string program_name)
 {
     // find task in inactive array

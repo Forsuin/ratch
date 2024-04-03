@@ -1,0 +1,19 @@
+This project will run a simple round-robin scheduler, you can set the amount of memory that the scheduler has access to, 
+you can set the burst size to limit how long a task can run before the next one starts. Both the system memory and burst 
+size default to being 4 units each.
+
+The scheduler will refuse to run any invalid input and will start the input loop over again. 
+
+
+How to build
+
+- 'make' to build executable
+- 'make clean' to remove executable
+
+How to run
+- ratch
+
+
+Note: I do have the state of the scheduler printed out every time unit instead of only when certain things change. 
+      This was to speed up development and because I felt that the important part of the assignment was the 
+      scheduler itself and getting that to work, not text formatting.

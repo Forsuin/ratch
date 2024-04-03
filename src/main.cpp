@@ -17,6 +17,8 @@ int main()
 
     while (!shouldClose)
     {
+
+        // Input tokenizer
         input.clear();
 
         fmt::print("Command> ");
@@ -105,6 +107,7 @@ int main()
         }
         else if (tokens[0] == "addProgram")
         {
+            // Check to make sure we have enough arguments and everything is a pair
             if (tokens.size() < 4 || tokens.size() % 2 != 0)
             {
                 fmt::println("Invalid number of arguments");
