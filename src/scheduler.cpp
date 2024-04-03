@@ -11,8 +11,10 @@ void Scheduler::start(std::string program_name)
     {
         if ((*it).name == program_name)
         {
-            if (used_memory + (*it).mem_req < total_memory)
+            if (used_memory + (*it).mem_req <= total_memory)
             {
+                used_memory += (*it).mem_req;
+
                 // add task to active queue and remove from inactive
                 active_tasks.push_back(*it);
                 inactive_tasks.erase(it);
@@ -70,7 +72,7 @@ void Scheduler::run()
 {
     fmt::println("Advancing the system untill all jobs finished");
 
-    while (!active_tasks.empty())
+    while (!active_tasks.empty() || !waiting_tasks.empty())
     {
         update();
     }
@@ -93,25 +95,24 @@ void Scheduler::update()
         Fifth, check if the currently running task has finished it's burst, but still has time left
         Sixth, increment elapsed time and decrement current tasks remaining time and waiting_task
     */
-    Task &current_task = active_tasks.front();
 
-    if (current_task.remaining_time == 0)
+    if (active_tasks[0].remaining_time == 0)
     {
-        current_task.finished_time = elapsed_time;
-        used_memory -= current_task.mem_req;
-        current_task.finished_time = elapsed_time;
-        finished_tasks.push_back(current_task);
+        active_tasks[0].finished_time = elapsed_time;
+        used_memory -= active_tasks[0].mem_req;
+        active_tasks[0].finished_time = elapsed_time;
+        finished_tasks.push_back(active_tasks[0]);
         active_tasks.pop_front();
-        current_task = active_tasks.front();
+        active_tasks[0] = active_tasks[0];
     }
 
-    if (!current_task.io_pairs.empty())
+    if (!active_tasks[0].io_pairs.empty())
     {
-        if (current_task.io_pairs.front().first == 0)
+        if (active_tasks[0].io_pairs.front().first == 0)
         {
-            waiting_tasks.push_back(current_task);
+            waiting_tasks.push_back(active_tasks[0]);
             active_tasks.pop_front();
-            current_task = active_tasks.front();
+            active_tasks[0] = active_tasks[0];
         }
     }
 
@@ -122,9 +123,9 @@ void Scheduler::update()
         waiting_tasks.pop_front();
     }
 
-    if (current_task.burst_size == 0)
+    if (active_tasks[0].burst_size == 0)
     {
-        current_task.burst_size = burst_size;
+        active_tasks[0].burst_size = burst_size;
         active_tasks.push_back(active_tasks.front());
         active_tasks.pop_front();
     }
@@ -133,15 +134,20 @@ void Scheduler::update()
 
     if (!active_tasks.empty())
     {
-        fmt::println("Running job {} has {} time units left and is using {} memory resources", current_task.name, current_task.remaining_time, current_task.mem_req);
+        fmt::println("Running job {} has {} time units left and is using {} memory resources", active_tasks[0].name, active_tasks[0].remaining_time, active_tasks[0].mem_req);
 
-        fmt::println("The queue is:");
+        fmt::print("The queue is:");
+
+        if (active_tasks.begin() + 1 == active_tasks.end())
+        {
+            fmt::println("empty");
+        }
 
         int i = 1;
         for (auto it = active_tasks.begin() + 1; it != active_tasks.end(); it++, i++)
         {
             Task &t = (*it);
-            fmt::println("\tPosition {}: job {} has {} time units and is using {} memory resources.", i, t.name, t.remaining_time, t.mem_req);
+            fmt::print("\tPosition {}: job {} has {} time units and is using {} memory resources.\n", i, t.name, t.remaining_time, t.mem_req);
         }
     }
     else
@@ -169,16 +175,18 @@ void Scheduler::update()
     }
 
     elapsed_time++;
-    current_task.remaining_time--;
-    current_task.burst_size--;
+    active_tasks[0].remaining_time--;
+    active_tasks[0].burst_size--;
 
-    if (!current_task.io_pairs.empty())
+    if (!active_tasks[0].io_pairs.empty())
     {
-        current_task.io_pairs.front().first--;
+        active_tasks[0].io_pairs.front().first--;
     }
 
     if (!waiting_tasks.empty())
     {
         waiting_tasks.front().io_pairs.front().second--;
     }
+
+    fmt::print("\n");
 }
